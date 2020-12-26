@@ -6,16 +6,17 @@ byte * readBytes(long length) {
     // Serial.println(i);
     for (int ibit = 0; ibit < 8; ibit++) {
       while (!digitalRead(SCL)) {
-        if (time + 100 < millis()) {
-          //return;
-        } // Waiting for SCL to became up
+        ESP.wdtFeed();
+        // Waiting for SCL to became up
       }
       bool read = digitalRead(SDA);
       digitalWrite(TR, 1);
       // Serial.println(read);
       bitWrite(result[i], ibit, read);
 
-      while (digitalRead(SCL)) {} // Waiting for SCL to became down after reading
+      while (digitalRead(SCL)) {
+        ESP.wdtFeed();
+      } // Waiting for SCL to became down after reading
       digitalWrite(TR, 0);
 
     }
@@ -32,13 +33,17 @@ bool* readBools(long length) {
     // Serial.print("Ascolto il bit: ");
     // Serial.println(i);
 
-    while (!digitalRead(SCL)) {} // Waiting for SCL to became up
+    while (!digitalRead(SCL)) {
+      ESP.wdtFeed();
+    }// Waiting for SCL to became up
     bool read = digitalRead(SDA);
     digitalWrite(TR, 1);
     // Serial.println(read);
     result[i] = read;
 
-    while (digitalRead(SCL)) {} // Waiting for SCL to became down after reading
+    while (digitalRead(SCL)) {
+      ESP.wdtFeed();
+    } // Waiting for SCL to became down after reading
     digitalWrite(TR, 0);
 
   }
@@ -75,17 +80,23 @@ short readShort() {
   return foo;
 }
 void fetchData() {
-  Serial.println("Fetching data /n");
+  Serial.println("Fetching data \n");
 
   digitalWrite(TR, 1);
-  while (!digitalRead(SCL)) {}
+  while (!digitalRead(SCL))
+  {
+    Serial.print(".");
+  }
   digitalWrite(TR, 0);
 
-  //int s = readShort();
   bool * info = readBools(16);
-  byte * message_size_b = readBytes(1);
-  int message_size = * message_size_b;
 
+  //int s = readShort();
+  /*
+    byte * message_size_b = readBytes(1);
+    int message_size = * message_size_b;
+  */
+  int message_size = readShort();
   if (info[0]) {
     Serial.println("Prendo speed");
     speed = readShort();
@@ -104,7 +115,6 @@ void fetchData() {
     Serial.print("Fuel level: ");
     Serial.println(fuel_level);
   }
-
   if (info[15]) {
     Serial.println("Reading message");
     message = readString(message_size);

@@ -1,21 +1,22 @@
-#define TR 11
-#define SDA 12
-#define SCL 13
+#define TR 12 //1 D1 5
+#define SDA 13 // 12 D2 4
+#define SCL 14 // 13 D3 0
 
 short speed, rpm;
 int fuel_level;
 String message; 
 void setup() {
+  ESP.wdtDisable();
   Serial.begin(250000);
 
   Serial.println("ricevitore");
   pinMode(TR, OUTPUT);
   pinMode(SDA, INPUT);
   pinMode(SCL, INPUT);
-  pinMode(2, INPUT_PULLUP);
-  fetchData(); 
 
 }
 void loop() {
- // delay(5000);
+    fetchData(); 
+
+ delay(5000);
 }
