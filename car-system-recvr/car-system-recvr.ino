@@ -2,9 +2,10 @@
 #define SDA 12
 #define SCL 13
 
-short speed, rpm;
-int fuel_level;
-String message; 
+short *speed, *rpm;
+int * fuel_level;
+char
+* message; 
 void setup() {
   Serial.begin(250000);
 
@@ -13,9 +14,9 @@ void setup() {
   pinMode(SDA, INPUT);
   pinMode(SCL, INPUT);
   pinMode(2, INPUT_PULLUP);
-
+fetchData();
 }
 void loop() {
-  fetchData(); 
-  delay(5000);
+ // fetchData(); 
+ // delay(5000);
 }
