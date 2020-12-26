@@ -1,80 +1,78 @@
-bool readBytes(long length, byte * bytes) {
+byte * readBytes(long length) {
   int time = millis();
-  bytes = new byte[length];
+  byte * result = new byte[length];
   for (int i = 0; i < length; i++) {
-    Serial.print("----------------------------Ascolto il byte: ");
-    Serial.println(i);
+    //Serial.print("----------------------------Ascolto il byte: ");
+    // Serial.println(i);
     for (int ibit = 0; ibit < 8; ibit++) {
       while (!digitalRead(SCL)) {
         if (time + 100 < millis()) {
-          //return false;
-        }
-      }                             // Waiting for SCL to became up
+          //return;
+        } // Waiting for SCL to became up
+      }
       bool read = digitalRead(SDA);
       digitalWrite(TR, 1);
-      Serial.println(read);
-      bitWrite(bytes[i], ibit, read);
-      while (digitalRead(SCL)) {}  // Waiting for SCL to became down after reading
+      // Serial.println(read);
+      bitWrite(result[i], ibit, read);
+
+      while (digitalRead(SCL)) {} // Waiting for SCL to became down after reading
       digitalWrite(TR, 0);
+
     }
-    //Serial.println((char)bytes[i]);
+    //result[i] = byte(readBools(8));
+    //Serial.println((char)result[i]);
   }
-  return true;
+  return result;
 }
 
-bool readBools(long length, bool* bools) {
+bool* readBools(long length) {
 
-  bools = new bool[length];
+  bool * result = new bool[length];
   for (int i = 0; i < length; i++) {
-    Serial.print("Ascolto il bit: ");
-    Serial.println(i);
+    // Serial.print("Ascolto il bit: ");
+    // Serial.println(i);
 
     while (!digitalRead(SCL)) {} // Waiting for SCL to became up
     bool read = digitalRead(SDA);
     digitalWrite(TR, 1);
-    Serial.println(read);
-    bools[i] = read;
+    // Serial.println(read);
+    result[i] = read;
 
     while (digitalRead(SCL)) {} // Waiting for SCL to became down after reading
     digitalWrite(TR, 0);
 
   }
-  return true;
+  return result;
 }
 
-bool readString(long int length, char* chars) {
+String readString(long int length) {
 
-  byte * r ;
-  readBytes(length, r);
+  byte * r = readBytes(length);
   r[length] = '\0';
-  chars = (char*)r;
-  return true;
+
+  return String((char*)r);
 }
-bool readInt(int * value) {
+int readInt() {
 
-  byte * r;
-  readBytes(4, r);
-  value = new int;
+  byte * r = readBytes(4);
 
-  *value = (int) r[3] << 24;
-  *value |=  (int) r[2] << 16;
-  *value |= (int) r[1] << 8;
-  *value |= (int) r[0];
+  int foo;
+  foo = (uint32_t) r[3] << 24;
+  foo |=  (uint32_t) r[2] << 16;
+  foo |= (uint32_t) r[1] << 8;
+  foo |= (uint32_t) r[0];
 
-  return true;
+  return foo;
 }
-bool readShort(short * value) {
-  byte * r ;
-  readBytes(2, r);
-  value = 0;
-  Serial.println("COSOOOOSOSOO!");
-    Serial.println(*value);
+short readShort() {
 
-  short t;
-  t = (short) r[1] << 8;
-  t |= (short) r[0] << 0;
-  *value = t;
-  return true;
+  byte * r = readBytes(2);
+
+  short foo;
+  foo = (short) r[1] << 8;
+  foo |= (short) r[0] << 0;
+
+  return foo;
 }
 void fetchData() {
   Serial.println("Fetching data /n");
@@ -84,55 +82,34 @@ void fetchData() {
   digitalWrite(TR, 0);
 
   //int s = readShort();
-  bool * info;
-  readBools(16, info);
-  byte * message_size_b;
-
-
-
-/*
-
-  readBytes(1, message_size_b);
-  int message_size = 0;
-  message_size = (int) * message_size_b;
-
-
-  Serial.println(*message_size_b);
-
-*/
-  Serial.println("PRENDO LA LUNGHEZZA");
-
-int * message_size_p;
-readShort(message_size_p);
-
-  Serial.println(*message_size_p);
-
-
+  bool * info = readBools(16);
+  byte * message_size_b = readBytes(1);
+  int message_size = * message_size_b;
 
   if (info[0]) {
     Serial.println("Prendo speed");
-    readShort(speed);
+    speed = readShort();
     Serial.print("Speed: ");
-    Serial.println(*speed);
+    Serial.println(speed);
   }
   if (info[1]) {
     Serial.println("Prendo rpm");
-    readShort(rpm);
+    rpm = readShort();
     Serial.print("RPM: ");
-    Serial.println(*rpm);
+    Serial.println(rpm);
   }
   if (info[2]) {
     Serial.println("Prendo fuel");
-    readInt(fuel_level);
+    fuel_level = readInt();
     Serial.print("Fuel level: ");
-    Serial.println(*fuel_level);
+    Serial.println(fuel_level);
   }
 
   if (info[15]) {
     Serial.println("Reading message");
-    readString(*message_size_p, message);
+    message = readString(message_size);
     Serial.print("Message: ");
-    Serial.println(*message);
+    Serial.println(message);
   }
 
 
