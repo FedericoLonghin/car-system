@@ -1,12 +1,33 @@
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+
+
 #define TR 12 //1 D1 5
 #define SDA 13 // 12 D2 4
 #define SCL 14 // 13 D3 0
 
+#ifndef APSSID
+#define APSSID "ESPap"
+#define APPSK  "passnode"
+#endif
+
+/* Set these to your desired credentials. */
+const char *ssid = APSSID;
+const char *password = APPSK;
+
+ESP8266WebServer server(80);
+
+/* Just a little test message.  Go to http://192.168.4.1 in a web browser
+   connected to this access point to see it.
+*/
+
+
 short speed, rpm;
 int fuel_level;
-String message; 
+String message;
 void setup() {
-  ESP.wdtDisable();
+  //ESP.wdtDisable();
   Serial.begin(250000);
 
   Serial.println("ricevitore");
@@ -14,9 +35,18 @@ void setup() {
   pinMode(SDA, INPUT);
   pinMode(SCL, INPUT);
 
+  Serial.println();
+  Serial.print("Configuring access point...");
+  /* You can remove the password parameter if you want the AP to be open. */
+  WiFi.softAP(ssid, password, 1, 0);
+
+  IPAddress myIP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(myIP);
+  server.on("/", handleRoot);
+  server.begin();
+  Serial.println("HTTP server started");
 }
 void loop() {
-    fetchData(); 
-
- delay(5000);
+  server.handleClient();
 }
