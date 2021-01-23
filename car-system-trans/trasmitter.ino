@@ -1,5 +1,3 @@
-
-
 void initSequence() {
   Serial.print("inizio la sequenza...");
   digitalWrite(SCL, 1);

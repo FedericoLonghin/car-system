@@ -1,0 +1,5 @@
+{
+    "board": "arduino:avr:uno",
+    "sketch": "car-system-trans/car-system-trans.ino",
+    "port": "/dev/tty.usbmodem1431101"
+}
