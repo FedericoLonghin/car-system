@@ -1,7 +1,7 @@
 
 void handleRoot() {
   fetchData();
-Serial.println("Request from client on /");
+  Serial.println("Request from client on /");
   String response = "{"
                     "'driver':{"
                     " 'id':4,"

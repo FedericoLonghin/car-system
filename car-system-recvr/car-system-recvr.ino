@@ -18,10 +18,6 @@ const char *password = APPSK;
 
 ESP8266WebServer server(80);
 
-/* Just a little test message.  Go to http://192.168.4.1 in a web browser
-   connected to this access point to see it.
-*/
-
 
 short speed, rpm;
 int fuel_level;
