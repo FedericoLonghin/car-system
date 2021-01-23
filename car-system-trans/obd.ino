@@ -3,11 +3,9 @@ void obdSetup()
   while (true)
   {
     Serial.print(F("Attempting to connect to OBD2 CAN bus ... "));
-
     if (!OBD2.begin())
     {
       Serial.println(F("failed!"));
-
       delay(1000);
     }
     else

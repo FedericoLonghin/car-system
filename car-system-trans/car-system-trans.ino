@@ -6,12 +6,16 @@
 #define SCL 13
 
 #define speed 500
+#define trans_size 16 //16 byte for every transition
 
 bool prevStat;
 
+bool boolFlag[16] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+byte* Message = ((byte*)"ciao, questo è abbastanza cortino");
+byte flags[] = {255, 255, 5};
 
 
-int smartSearch = 1;
+int smartSearch = 0;
 int maxPidsCount = 1000;
 int maxPidsResearchCount = 100;
 
@@ -20,9 +24,9 @@ float *enabledpids = new float[maxPidsCount];
 
 typedef enum
 {
-    Raw = 1,
-    Clear = 2,
-    Error = 0,
+  Raw = 1,
+  Clear = 2,
+  Error = 0,
 } ReturnType;
 
 ReturnType getPidsValue(int pid, float &value);
@@ -33,25 +37,24 @@ void fetchData();
 
 void setup()
 {
-	Serial.begin(9600);
+  Serial.begin(9600);
 
-	Serial.println("trasmettitore");
-	pinMode(TR, INPUT);
-	pinMode(SDA, OUTPUT);
-	pinMode(SCL, OUTPUT);
+  Serial.println("trasmettitore");
+  pinMode(TR, INPUT);
+  pinMode(SDA, OUTPUT);
+  pinMode(SCL, OUTPUT);
 
-	obdSetup();
+  obdSetup();
 }
 void loop()
 {
+#ifdef ESP
+  ESP.wdtFeed();
+#endif
+  if (digitalRead(TR)) {
+    replyRequest();
 
-	if (digitalRead(TR))
-	{
-		initSequence();
+  }
 
-		mandaByte(0x55);
-		endSequence();
-	}
-
-	fetchData();
+  fetchData();
 }
