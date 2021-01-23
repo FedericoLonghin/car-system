@@ -1,15 +1,20 @@
-void replyRequest() {
+void replyRequest(){
   initSequence();
-  sendFlags();
+i++;
 
+    sendFlags();
   float value = 3;
   if (boolFlag[0] && getPidsValue(VEHICLE_SPEED, value))     sendShort(value);
   if (boolFlag[1] && getPidsValue(ENGINE_RPM, value))  sendShort(value);
   if (boolFlag[2] && getPidsValue(FUEL_SYSTEM_STATUS, value)) sendInt(value);
-  if (boolFlag[15]) sendString(Message);
+  
+//    if (boolFlag[0] ) sendShort(i);
+//    if (boolFlag[1])  sendShort(46);
+//    if (boolFlag[2]) sendInt(20);
+    if (boolFlag[15]) sendString(Message);
 
-  endSequence();
-  Serial.println("All done");
+    endSequence();
+    Serial.println("All done");
 }
 
 void initSequence() {
@@ -33,14 +38,14 @@ void mandaByte(byte data[256], int length) {
 
       digitalWrite(SCL, 1);
       while (!digitalRead(TR)) {
-        //  ESP.wdtFeed();
+      //  ESP.wdtFeed();
         // Serial.print(".");
       }
       Serial.print(" ...ricevuto");
       digitalWrite(SDA, 0);
       digitalWrite(SCL, 0);
       while (digitalRead(TR)) {  //Serial.print(",");
-        //  ESP.wdtFeed();
+      //  ESP.wdtFeed();
       }
       Serial.println(" | esco");
     }
@@ -77,26 +82,24 @@ void sendShort(int val) {
 }
 
 void sendString(byte data[256]) {
-  int n = getLength(data);
+int n=getLength(data);
   mandaByte(data, n);
 
 }
 
 void sendFlags() {
   Serial.println("----------------------------------------------------FLAGS--------------------------------------------------");
-  for ( int i = 0; i < 16; i++) {
-    bitWrite(flags[i / 8], i % 8, boolFlag[i]);
+  for( int i = 0; i < 16; i++) {
+  bitWrite(flags[i / 8], i % 8, boolFlag[i]);
   }
 
-  mandaByte(flags, 2);
-  sendShort(getLength(Message));
+ mandaByte(flags, 2);
+ sendShort(getLength(Message));
 }
 
 
-int getLength(byte value[256]) {
-  int i = 0;
-  while (value[i] != '\0') {
-    i++;
-  }
+int getLength(byte value[256]){
+  int i=0; 
+  while(value[i]!='\0'){i++;}
   return i;
 }

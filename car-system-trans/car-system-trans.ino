@@ -1,18 +1,41 @@
+//#define ESPb
+#define AVRb
+
+#ifdef ESPb
+#define TR 12
+#define SDA 13
+#define SCL 14
+#endif
+
+#ifdef AVRb
+#define TR 3
+#define SDA 4
+#define SCL 5
+#endif
+
+
+
 #include <CAN.h>
 #include <OBD2.h>
 
-#define TR 11
-#define SDA 12
-#define SCL 13
-
-#define speed 500
 #define trans_size 16 //16 byte for every transition
-
 bool prevStat;
+
+int i=0;
+
+byte flags[] = {255, 255, 5};
+//byte lorem[] ="Lorem ipsum dolor sit ame";
+enum dictionary {
+  speed,
+  rpm,
+  lat,
+  longi,
+  message,
+  another
+};
 
 bool boolFlag[16] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 byte* Message = ((byte*)"ciao, questo è abbastanza cortino");
-byte flags[] = {255, 255, 5};
 
 
 int smartSearch = 0;
@@ -33,28 +56,27 @@ ReturnType getPidsValue(int pid, float &value);
 void obdSetup();
 void fetchData();
 
-
-
-void setup()
-{
-  Serial.begin(9600);
+void setup() {
+  //ESP.wdtDisable();
+  Serial.begin(230400);
 
   Serial.println("trasmettitore");
   pinMode(TR, INPUT);
   pinMode(SDA, OUTPUT);
   pinMode(SCL, OUTPUT);
-
-  obdSetup();
+    obdSetup();
+delay(2000);
 }
-void loop()
-{
-#ifdef ESP
-  ESP.wdtFeed();
-#endif
+
+
+void loop() {
+  #ifdef ESPb
+        ESP.wdtFeed();
+        #endif
+
   if (digitalRead(TR)) {
     replyRequest();
-
+    
   }
 
-  fetchData();
 }
