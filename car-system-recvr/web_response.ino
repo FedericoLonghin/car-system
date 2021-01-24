@@ -1,6 +1,7 @@
 
 void handleRoot() {
   fetchData();
+  Serial.println(speed);
   Serial.println("Request from client on /");
   String response = "{"
                     "'driver':{"

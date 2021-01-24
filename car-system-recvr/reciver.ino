@@ -21,7 +21,8 @@ bool readBit() {
     ESP.wdtFeed();
     // Waiting for SCL to became up
     if (millis() - timeout_delay > t0) {
-      Serial.println("Timeout");
+      Serial.println("Timeout (Mi aspetto SCL a 1)");
+      
     }
   }
   bool read = digitalRead(SDA);
@@ -31,7 +32,7 @@ bool readBit() {
   while (digitalRead(SCL)) {
     // Waiting for SCL to became down after reading
     if (millis() - timeout_delay > t0) {
-      Serial.println("Timeout");
+      Serial.println("Timeout (Mi aspetto SCL a 0)");
     }
     ESP.wdtFeed();
   }
