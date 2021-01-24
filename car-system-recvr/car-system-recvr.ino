@@ -20,7 +20,7 @@ ESP8266WebServer server(80);
 
 short speed, rpm;
 int fuel_level;
-String message;
+char* message;
 int timeout_delay = 2000;
 
 void setup() {

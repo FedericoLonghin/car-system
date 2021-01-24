@@ -1,85 +1,82 @@
-byte * readBytes(int length) {
-  byte * result = new byte[length];
+bool readBytes(int length, byte * result) {
+  result = new byte[length];
   for (int i = 0; i < length; i++) {
-    result[i] = readByte();
+    if (!readByte(result[i])) return false;
   }
-  return result;
+  return true;
 }
 
-byte readByte() {
-  byte result;
+bool readByte(byte &result) {
   for (int ibit = 0; ibit < 8; ibit++) {
-    bool read = readBit();
+    bool read;
+    if (!readBit(read)) return false;
     bitWrite(result, ibit, read);
   }
-  return result;
+  return true;
 }
 
-bool readBit() {
+bool readBit(bool &value) {
   int t0 = millis();
   while (!digitalRead(SCL)) {
     ESP.wdtFeed();
     // Waiting for SCL to became up
     if (millis() - timeout_delay > t0) {
       Serial.println("Timeout (Mi aspetto SCL a 1)");
-      
+      return false;
     }
   }
-  bool read = digitalRead(SDA);
+  value = digitalRead(SDA);
   digitalWrite(TR, 1);
-  // Serial.println(read);
   t0 = millis();
   while (digitalRead(SCL)) {
     // Waiting for SCL to became down after reading
     if (millis() - timeout_delay > t0) {
       Serial.println("Timeout (Mi aspetto SCL a 0)");
+      return false;
     }
     ESP.wdtFeed();
   }
   digitalWrite(TR, 0);
-  return read;
+  return true;
 }
 
-bool* readBools(long length) {
-  bool * result = new bool[length];
+bool readBools(long length, bool * result ) {
+  result = new bool[length];
   for (int i = 0; i < length; i++) {
-    result[i] = readBit();
+    if (! readBit(result[i])) return false;
   }
-  return result;
+  return true;
 }
 
-String readString(long int length) {
-  byte * r = readBytes(length);
+bool readString(long int length, char * result) {
+  byte * r;
+  if (! readBytes(length, r)) return false;
   r[length] = '\0';
-  return String((char*)r);
+  result = (char*)r;
+  return true;
 }
 
-int readInt() {
-  int value;
-
-  //byte * r = readBytes(4);
-  //foo = (uint32_t) r[3] << 24;
-  //foo |=  (uint32_t) r[2] << 16;
-  //foo |= (uint32_t) r[1] << 8;
-  //foo |= (uint32_t) r[0];
-
-  value = (uint32_t) readByte();
-  value |=  (uint32_t) readByte() << 8;
-  value |= (uint32_t) readByte() << 16;
-  value |= (uint32_t) readByte() << 24;
-  return value;
+bool readInt(int & value) {
+  value = 0;
+  byte b;
+  if (!readByte(b))return false;
+  value = (int) (b);
+  if (!readByte(b))return false;
+  value |=  (int) (b) << 8;
+  if (!readByte(b))return false;
+  value |= (int) (b) << 16;
+  if (!readByte(b))return false;
+  value |= (int) (b) << 24;
+  return true;
 }
-short readShort() {
-  short value;
-
-  //byte * r = readBytes(2);
-  //foo = (short) r[1] << 8;
-  //foo |= (short) r[0] << 0;
-
-  value = (uint32_t) readByte();
-  value |= (uint32_t) readByte() << 8;
-
-  return value;
+bool readShort(short & value) {
+  value = 0;
+  byte b;
+  if (!readByte(b))return false;
+  value = (int) (b);
+  if (!readByte(b))return false;
+  value |=  (int) (b) << 8;
+  return true;
 }
 bool fetchData() {
   Serial.println("Fetching data \n");
@@ -95,30 +92,32 @@ bool fetchData() {
   }
   digitalWrite(TR, 0);
 
-  bool * info = readBools(16);
-  int message_size = readShort();
+  bool * info;
+  if (!readBools(16, info))return false;
+  short message_size;
+  if (!readShort(message_size))return false;
 
   if (info[0]) {
     Serial.println("Prendo speed");
-    speed = readShort();
+    if (!readShort(speed))return false;
     Serial.print("Speed: ");
     Serial.println(speed);
   }
   if (info[1]) {
     Serial.println("Prendo rpm");
-    rpm = readShort();
+    if (!readShort(rpm))return false;
     Serial.print("RPM: ");
     Serial.println(rpm);
   }
   if (info[2]) {
     Serial.println("Prendo fuel");
-    fuel_level = readInt();
+    if (!readInt(fuel_level))return false;
     Serial.print("Fuel level: ");
     Serial.println(fuel_level);
   }
   if (info[15]) {
     Serial.println("Reading message");
-    message = readString(message_size);
+    if (!readString(message_size, message))return false;
     Serial.print("Message: ");
     Serial.println(message);
   }
