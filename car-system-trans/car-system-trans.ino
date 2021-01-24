@@ -61,7 +61,7 @@ long last_obd_check = 0;
 int obd_check_delay = 5000;
 
 void setup() {
-  Serial.begin(230400);
+  Serial.begin(250000);
   Serial.println("trasmettitore");
 
   pinMode(TR, INPUT);

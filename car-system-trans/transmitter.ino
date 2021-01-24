@@ -1,16 +1,16 @@
 void replyRequest() {
 
-  if (initSequence() ) { //&& sendFlags()
+  if (initSequence() && sendFlags()) { //
     Serial.println("----------------------------------------------------DATI--------------------------------------------------");
-    /* if (boolFlag[0] )
-       if (!sendShort(dati[VEHICLE_SPEED]))return false;
-      if (boolFlag[1])
-       if (!sendShort(dati[ENGINE_RPM]))return false;
-      if (boolFlag[2])
-       if (!sendInt(dati[FUEL_SYSTEM_STATUS]))return false;
-      if (boolFlag[15])
-       if (!sendString(Message))return false;
-    */
+    if (boolFlag[0] )
+      if (!sendShort(dati[VEHICLE_SPEED]))return false;
+    if (boolFlag[1])
+      if (!sendShort(dati[ENGINE_RPM]))return false;
+    if (boolFlag[2])
+      if (!sendInt(dati[FUEL_SYSTEM_STATUS]))return false;
+    if (boolFlag[15])
+      if (!sendString(Message))return false;
+
     endSequence();
     Serial.print("All done ");
   } else {
@@ -41,7 +41,7 @@ bool initSequence() {
   tf = millis() + timeout_delay;
   while (!digitalRead(TR)) {
     //Aspetto lo ritiri su
-     if (millis() > tf) {
+    if (millis() > tf) {
       Serial.println("Timeout Aspettando TR che andasse a 1");
       endSequence();
       return false;
@@ -52,7 +52,7 @@ bool initSequence() {
   tf = millis() + timeout_delay;
   while (digitalRead(TR)) {
     //Aspetto lo tiri giù
-     if (millis() > tf) {
+    if (millis() > tf) {
       Serial.println("Timeout Aspettando TR che andasse a 0 alla fine");
       endSequence();
       return false;
