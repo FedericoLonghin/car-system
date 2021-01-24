@@ -20,7 +20,7 @@
 
 #define trans_size 16 //16 byte for every transition
 bool prevStat;
-int timeout_delay = 1000;
+int timeout_delay = 3000;
 
 byte flags[] = {255, 255, 5};
 enum dictionary {
@@ -39,7 +39,7 @@ byte* Message = ((byte*)"ciao, questo è abbastanza cortino");
 int smartSearch = 0;
 int maxPidsCount = 1000;
 int maxPidsResearchCount = 100;
-
+bool obdStatus = 0;
 float *dati = new float[maxPidsResearchCount];
 float *enabledpids = new float[maxPidsCount];
 
@@ -53,16 +53,20 @@ typedef enum
 ReturnType getPidsValue(int pid, float &value);
 void obdSetup();
 void fetchData();
+
 long last_fetch = 0;
 int fetch_delay = 1000;
+long last_obd_check = 0;
+int obd_check_delay = 5000;
+
 void setup() {
   Serial.begin(230400);
   Serial.println("trasmettitore");
-  
+
   pinMode(TR, INPUT);
   pinMode(SDA, OUTPUT);
   pinMode(SCL, OUTPUT);
-  
+
   obdSetup();
   delay(2000);
 }
@@ -79,5 +83,9 @@ void loop() {
   }
   if (digitalRead(TR)) {
     replyRequest();
+  }
+  if (!obdStatus && millis() - last_obd_check > obd_check_delay) {
+    obdSetup();
+    last_obd_check = millis();
   }
 }

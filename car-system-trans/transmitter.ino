@@ -31,11 +31,13 @@ bool initSequence() {
   long t0 = millis();
   while (digitalRead(TR)) {
     if (millis() - timeout_delay > t0) {
-      Serial.println("Timeout");
+      Serial.println("Timeout init sequenza");
+      digitalWrite(SCL, 0);
       return false;
     }
   }
   digitalWrite(SCL, 0);
+  return true;
 }
 
 bool mandaByte(byte *data, int length) {
@@ -53,7 +55,8 @@ bool mandaByte(byte *data, int length) {
         //  ESP.wdtFeed();
         // Serial.print(".");
         if (millis() - timeout_delay > t0) {
-          Serial.println("Timeout");
+          Serial.println("Timeout (Mi aspetto il TR ad 1 ed è a 0)");
+          endSequence();
           return false;
         }
       }
@@ -64,7 +67,8 @@ bool mandaByte(byte *data, int length) {
       while (digitalRead(TR)) {  //Serial.print(",");
         //  ESP.wdtFeed();
         if (millis() - timeout_delay > t0) {
-          Serial.println("Timeout");
+          Serial.println("Timeout  (Mi aspetto il TR ad 0 ed è a 1)");
+          endSequence();
           return false;
         }
       }

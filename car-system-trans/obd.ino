@@ -1,6 +1,6 @@
 void obdSetup()
 {
-  while (true)
+  for (int t = 0; t < 2; t++)
   {
     Serial.print(F("Attempting to connect to OBD2 CAN bus ... "));
     if (!OBD2.begin())
@@ -11,6 +11,7 @@ void obdSetup()
     else
     {
       Serial.println(F("success"));
+      obdStatus = 1;
       break;
     }
   }
@@ -20,9 +21,11 @@ void obdSetup()
 ReturnType getPidsValue(int pid, float &value)
 {
 
-  if (!OBD2.pidSupported(pid))
+  if ( !obdStatus || !OBD2.pidSupported(pid) )
   {
     // PID not supported, continue to next one ...
+    Serial.print(OBD2.pidName(pid));
+    Serial.println(" Not supported");
     return Error;
   }
 
@@ -65,6 +68,7 @@ ReturnType getPidsValue(int pid, float &value)
 
 void fetchData()
 {
+  if (!obdStatus)return;
   for (int pid = 0; pid < maxPidsCount; pid++)
   {
     float result;
