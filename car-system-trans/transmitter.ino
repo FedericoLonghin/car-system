@@ -1,6 +1,5 @@
 void replyRequest() {
-  Serial.print("inizio la sequenza..:");
-  Serial.println(millis());
+
   if (initSequence() ) { //&& sendFlags()
     Serial.println("----------------------------------------------------DATI--------------------------------------------------");
     /* if (boolFlag[0] )
@@ -21,20 +20,28 @@ void replyRequest() {
 }
 
 bool initSequence() {
-  Serial.println("Alzo SCL = 1");
+  Serial.println("Inizio la seq");
   digitalWrite(SCL, 1);
-  long tf = millis() + timeout_delay;
+  Serial.println("SCL 1");
+  digitalWrite(SDA, 1);
+  Serial.println("SDA 1");
   while (digitalRead(TR)) {
-    if (millis() > tf) {
-      Serial.println("Timeout init sequenza");
-      Serial.println("Abbasso SCL = 0");
-      digitalWrite(SCL, 0);
-      return false;
-    }
+    Serial.print(".");
+    //Aspetto lo tiri giù
   }
+  Serial.println("");
   digitalWrite(SCL, 0);
- 
-  Serial.println("Abbasso SCL = 0, Lui ha abbassato TR");
+  Serial.println("SCL 0");
+  while (!digitalRead(TR)) {
+    //Aspetto lo ritiri su
+  }
+  digitalWrite(SDA, 0);
+  Serial.println("SDA 0");
+
+  while (digitalRead(TR)) {
+    //Aspetto lo tiri giù
+  }
+  Serial.println("Finisco la seq");
   return true;
 }
 
@@ -136,4 +143,24 @@ void endSequence() {
   digitalWrite(SDA, 1);
   Serial.println("Alzo SDA = 1");
 
+}
+
+
+
+bool _oldinitSequence() {
+  Serial.println("Alzo SCL = 1");
+  digitalWrite(SCL, 1);
+  long tf = millis() + timeout_delay;
+  while (digitalRead(TR)) {
+    if (millis() > tf) {
+      Serial.println("Timeout init sequenza");
+      Serial.println("Abbasso SCL = 0");
+      digitalWrite(SCL, 0);
+      return false;
+    }
+  }
+  digitalWrite(SCL, 0);
+
+  Serial.println("Abbasso SCL = 0, Lui ha abbassato TR");
+  return true;
 }

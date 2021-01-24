@@ -11,6 +11,7 @@
 #define TR 3
 #define SDA 4
 #define SCL 5
+#define RST_EXT A0
 #endif
 
 
@@ -66,17 +67,22 @@ void setup() {
   pinMode(TR, INPUT);
   pinMode(SDA, OUTPUT);
   pinMode(SCL, OUTPUT);
-digitalWrite(SDA,0);
-digitalWrite(SCL,0);
+  pinMode(RST_EXT, OUTPUT);
+
+  digitalWrite(SDA, 0);
+  digitalWrite(SCL, 0);
+  
+  digitalWrite(RST_EXT, 1);
   obdSetup();
-  delay(2000);
+  digitalWrite(RST_EXT, 0);
+  delay(100);
+  digitalWrite(RST_EXT, 1);
+  //delay(2000);
 }
 
 
 void loop() {
 
-
-  
   if (millis() - last_fetch > fetch_delay && 0) {
     Serial.print("Start fetching:");
     Serial.println(millis());
