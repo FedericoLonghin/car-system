@@ -21,7 +21,7 @@ ESP8266WebServer server(80);
 short speed, rpm;
 int fuel_level;
 String message;
-int timeout_delay = 1000;
+int timeout_delay = 2000;
 
 void setup() {
   //ESP.wdtDisable();
@@ -44,5 +44,6 @@ void setup() {
   Serial.println("HTTP server started");
 }
 void loop() {
-  server.handleClient();
+  //server.handleClient();
+  fetchData();
 }
