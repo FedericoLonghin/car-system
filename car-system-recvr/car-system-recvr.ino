@@ -44,13 +44,14 @@ void setup() {
   Serial.println("HTTP server started");
 
 
-delay(2000);
+  delay(2000);
+  fetchData();
 }
 void loop() {
-      ESP.wdtFeed();
-if(Serial.read()=='r'){
+  ESP.wdtFeed();
+  if (Serial.read() == 'r') {
     fetchData();
-}
+  }
   //server.handleClient();
   // fetchData();
 
