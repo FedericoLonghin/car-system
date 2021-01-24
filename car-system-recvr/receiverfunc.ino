@@ -21,6 +21,7 @@ bool readByte(byte &result) {
     }
     bitWrite(result, ibit, read);
   }
+  Serial.println(result);
   Serial.println("Done.");
   return true;
 }
@@ -61,22 +62,28 @@ bool readBools(long length, bool * result ) {
   result = new bool[length];
   for (int i = 0; i < length; i++) {
     if (! readBit(result[i])) return false;
-    //    Serial.print("Bit ");
-    //    Serial.print(i);
-    //    Serial.print(": ");
-    //    Serial.print(result[i]);
+    Serial.print("Bit ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(result[i]);
   }
   Serial.println("Done.");
   return true;
 }
-bool readInfo() {
-  Serial.println("Reading Info...");
+
+bool readFlags() {
+  Serial.println("Reading Flags...");
   for (int i = 0; i < 16; i++) {
-    if (! readBit(info[i])) return false;
+    if (! readBit(flags[i])) return false;
+    Serial.print("Bit ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(flags[i]);
   }
   Serial.println("Done.");
   return true;
 }
+
 
 bool readString(long int length, char * result) {
   Serial.println("Reading String...");

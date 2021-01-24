@@ -5,14 +5,9 @@
 bool fetchData() {
   Serial.println("Fetching data...");
   if (!initSequence())return false;
-
-  Serial.println("initialized!");
-  bool * info =  new bool[16];
-//  for (int a = 0; a < 16; a++) {
-//    info[a]=0;
-//  }
-  if (!readInfo()) {
-    Serial.println("Error in Info");
+  
+  if (!readFlags()) {
+    Serial.println("Error in Flags");
     return false;
   }
 
@@ -22,33 +17,33 @@ bool fetchData() {
     return false;
   }
   Serial.println("CI SONO");
-  Serial.println(info[0]);
+  Serial.println(flags[0]);
 
-  for (int a = 0; a < 15; a++) {
-    Serial.print(info[a]);
+  for (int a = 0; a < 16; a++) {
+    Serial.print(flags[a]);
     Serial.print(" ");
   }
   Serial.println("");
-  if (info[0]) {
+  if (flags[0]) {
     Serial.println("Prendo speed");
     delay(300);
     if (!readShort(speed))return false;
     Serial.print("Speed: ");
     Serial.println(speed);
   }
-  if (info[1]) {
+  if (flags[1]) {
     Serial.println("Prendo rpm");
     if (!readShort(rpm))return false;
     Serial.print("RPM: ");
     Serial.println(rpm);
   }
-  if (info[1]) {
+  if (flags[2]) {
     Serial.println("Prendo fuel");
     if (!readInt(fuel_level))return false;
     Serial.print("Fuel level: ");
     Serial.println(fuel_level);
   }
-  if (info[15]) {
+  if (flags[15]) {
     Serial.println("Reading message");
     if (!readString(message_size, message))return false;
     Serial.print("Message: ");
