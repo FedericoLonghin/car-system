@@ -20,7 +20,7 @@
 
 #define trans_size 16 //16 byte for every transition
 bool prevStat;
-int timeout_delay = 3000;
+int timeout_delay = 1000;
 
 byte flags[] = {255, 255, 5};
 enum dictionary {
@@ -66,14 +66,18 @@ void setup() {
   pinMode(TR, INPUT);
   pinMode(SDA, OUTPUT);
   pinMode(SCL, OUTPUT);
-
+digitalWrite(SDA,0);
+digitalWrite(SCL,0);
   obdSetup();
   delay(2000);
 }
 
 
 void loop() {
-  if (millis() - last_fetch > fetch_delay) {
+
+
+  
+  if (millis() - last_fetch > fetch_delay && 0) {
     Serial.print("Start fetching:");
     Serial.println(millis());
     fetchData();
@@ -84,7 +88,7 @@ void loop() {
   if (digitalRead(TR)) {
     replyRequest();
   }
-  if (!obdStatus && millis() - last_obd_check > obd_check_delay) {
+  if (!obdStatus && millis() - last_obd_check > obd_check_delay && 0) {
     obdSetup();
     last_obd_check = millis();
   }
