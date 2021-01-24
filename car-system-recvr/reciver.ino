@@ -1,103 +1,24 @@
-bool readBytes(int length, byte * result) {
-  result = new byte[length];
-  for (int i = 0; i < length; i++) {
-    if (!readByte(result[i])) return false;
-  }
-  return true;
-}
 
-bool readByte(byte &result) {
-  for (int ibit = 0; ibit < 8; ibit++) {
-    bool read;
-    if (!readBit(read)) return false;
-    bitWrite(result, ibit, read);
-  }
-  return true;
-}
 
-bool readBit(bool &value) {
-  int t0 = millis();
-  while (!digitalRead(SCL)) {
-    ESP.wdtFeed();
-    // Waiting for SCL to became up
-    if (millis() - timeout_delay > t0) {
-      Serial.println("Timeout (Mi aspetto SCL a 1)");
-      endSequence();
-      return false;
-    }
-  }
-  value = digitalRead(SDA);
-  digitalWrite(TR, 1);
-  t0 = millis();
-  while (digitalRead(SCL)) {
-    // Waiting for SCL to became down after reading
-    if (millis() - timeout_delay > t0) {
-      Serial.println("Timeout (Mi aspetto SCL a 0)");
-      endSequence();
-      return false;
-    }
-    ESP.wdtFeed();
-  }
-  digitalWrite(TR, 0);
-  return true;
-}
 
-bool readBools(long length, bool * result ) {
-  result = new bool[length];
-  for (int i = 0; i < length; i++) {
-    if (! readBit(result[i])) return false;
-  }
-  return true;
-}
 
-bool readString(long int length, char * result) {
-  byte * r;
-  if (! readBytes(length, r)) return false;
-  r[length] = '\0';
-  result = (char*)r;
-  return true;
-}
-
-bool readInt(int & value) {
-  value = 0;
-  byte b;
-  if (!readByte(b))return false;
-  value = (int) (b);
-  if (!readByte(b))return false;
-  value |=  (int) (b) << 8;
-  if (!readByte(b))return false;
-  value |= (int) (b) << 16;
-  if (!readByte(b))return false;
-  value |= (int) (b) << 24;
-  return true;
-}
-bool readShort(short & value) {
-  value = 0;
-  byte b;
-  if (!readByte(b))return false;
-  value = (int) (b);
-  if (!readByte(b))return false;
-  value |=  (int) (b) << 8;
-  return true;
-}
 bool fetchData() {
-  Serial.println("Fetching data \n");
-  digitalWrite(TR, 1);
-  long t0 = millis();
-  while (!digitalRead(SCL))
-  {
-    Serial.print(".");
-    if (millis() - timeout_delay > t0) {
-      return false;
-    }
-    ESP.wdtFeed();
-  }
-  digitalWrite(TR, 0);
-
+  Serial.println("Fetching data...");
+  if (!initSequence())return false;
+  Serial.println("Done!");
+  return 1;
   bool * info;
-  if (!readBools(16, info))return false;
+  if (!readBools(16, info)) {
+    Serial.println("Error in Bools");
+    return false;
+  }
+
   short message_size;
-  if (!readShort(message_size))return false;
+  if (!readShort(message_size)) {
+    Serial.println("Error in Short");
+    return false;
+  }
+
 
   if (info[0]) {
     Serial.println("Prendo speed");
@@ -127,6 +48,62 @@ bool fetchData() {
   return true;
 }
 
-void endSequence() {
+
+
+bool notAnInitSequence() {
+  Serial.println("Init Sequence");
+  long tf = millis() + timeout_delay;
+  digitalWrite(TR, 1);
+  while (!digitalRead(SCL))
+  {
+    Serial.print(".");
+    if (millis() > tf) {
+      Serial.print("Millis: ");
+      Serial.print(millis());
+      Serial.print(" timeout: ");
+      Serial.println(tf);
+      Serial.println("Waiting for !SCL... Exit");
+      return false;
+    }
+    ESP.wdtFeed();
+  }
   digitalWrite(TR, 0);
+  Serial.println("");
+
+  //  while (digitalRead(SCL)) {
+  //    ESP.wdtFeed();
+  //    Serial.println("waiting for !SCL");
+  //  }
+  Serial.println("Sequence initalized");
+  return true;
+}
+
+
+bool initSequence() {
+  Serial.println("TR=1");
+  digitalWrite(TR, 1);
+    Serial.println("? !SDA !SCL /n");
+  while ( !digitalRead(SCL)) {  Serial.print(".");} //aspetto che vengano alzati
+    Serial.println("TR=0");
+  digitalWrite(TR, 0);
+      Serial.println("? SDA SCL /n");
+  while (digitalRead(SDA) && digitalRead(SCL)) {Serial.print(".");}
+      Serial.println("if SDA !SCL");
+  if (digitalRead(SDA) && !digitalRead(SCL)){
+    
+      Serial.println("TR=1");
+      digitalWrite(TR, 1);
+  }
+      Serial.println("?SDA");
+  while (digitalRead(SDA)) {Serial.print(".");}
+      Serial.println("TR=0");
+digitalWrite(TR, 0);
+Serial.println("FATTO");
+}
+
+
+void endSequence() {
+  Serial.print("Ending Sequence... ");
+  digitalWrite(TR, 0);
+  Serial.println("DONE!!!.");
 }
