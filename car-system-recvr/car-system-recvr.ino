@@ -21,17 +21,17 @@ ESP8266WebServer server(80);
 short speed, rpm;
 int fuel_level;
 char* message;
-int timeout_delay = 2000;
+int timeout_delay = 500;
 
 void setup() {
-  //ESP.wdtDisable();
+  ESP.wdtDisable();
   Serial.begin(250000);
 
   Serial.println("ricevitore");
   pinMode(TR, OUTPUT);
   pinMode(SDA, INPUT);
   pinMode(SCL, INPUT);
-
+  digitalWrite(TR, 0);
   Serial.println();
   Serial.print("Configuring access point...");
   WiFi.softAP(ssid, password, 1, 0);
@@ -42,8 +42,16 @@ void setup() {
   server.on("/", handleRoot);
   server.begin();
   Serial.println("HTTP server started");
+
+
+delay(2000);
 }
 void loop() {
+      ESP.wdtFeed();
+if(Serial.read()=='r'){
+    fetchData();
+}
   //server.handleClient();
-  fetchData();
+  // fetchData();
+
 }
