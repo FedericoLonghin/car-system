@@ -82,23 +82,29 @@ bool notAnInitSequence() {
 bool initSequence() {
   Serial.println("TR=1");
   digitalWrite(TR, 1);
-    Serial.println("? !SDA !SCL /n");
-  while ( !digitalRead(SCL)) {  Serial.print(".");} //aspetto che vengano alzati
-    Serial.println("TR=0");
-  digitalWrite(TR, 0);
-      Serial.println("? SDA SCL /n");
-  while (digitalRead(SDA) && digitalRead(SCL)) {Serial.print(".");}
-      Serial.println("if SDA !SCL");
-  if (digitalRead(SDA) && !digitalRead(SCL)){
-    
-      Serial.println("TR=1");
-      digitalWrite(TR, 1);
+  Serial.println("? !SDA !SCL /n");
+  while ( !digitalRead(SCL) ||  !digitalRead(SDA)) {
+    Serial.print("."); //aspetto che vengano alzati
   }
-      Serial.println("?SDA");
-  while (digitalRead(SDA)) {Serial.print(".");}
-      Serial.println("TR=0");
-digitalWrite(TR, 0);
-Serial.println("FATTO");
+  Serial.println("TR=0");
+  digitalWrite(TR, 0);
+  Serial.println("? SDA SCL /n");
+  while (digitalRead(SCL)) { //MANCHEREBBE SDA MA SHALLA PER ORA
+    Serial.print(".");
+  }
+  Serial.println("if SDA !SCL");
+
+
+  Serial.println("TR=1");
+  digitalWrite(TR, 1);
+
+  Serial.println("?SDA");
+  while (digitalRead(SDA)) {
+    Serial.print(".");
+  }
+  Serial.println("TR=0");
+  digitalWrite(TR, 0);
+  Serial.println("FATTO");
 }
 
 
