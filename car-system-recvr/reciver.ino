@@ -1,102 +1,102 @@
-byte * readBytes(long length) {
-  int time = millis();
+byte * readBytes(int length) {
   byte * result = new byte[length];
   for (int i = 0; i < length; i++) {
-    //Serial.print("----------------------------Ascolto il byte: ");
-    // Serial.println(i);
-    for (int ibit = 0; ibit < 8; ibit++) {
-      while (!digitalRead(SCL)) {
-        ESP.wdtFeed();
-        // Waiting for SCL to became up
-      }
-      bool read = digitalRead(SDA);
-      digitalWrite(TR, 1);
-      // Serial.println(read);
-      bitWrite(result[i], ibit, read);
-
-      while (digitalRead(SCL)) {
-        ESP.wdtFeed();
-      } // Waiting for SCL to became down after reading
-      digitalWrite(TR, 0);
-
-    }
-    //result[i] = byte(readBools(8));
-    //Serial.println((char)result[i]);
+    result[i] = readByte();
   }
   return result;
 }
 
-bool* readBools(long length) {
+byte readByte() {
+  byte result;
+  for (int ibit = 0; ibit < 8; ibit++) {
+    bool read = readBit();
+    bitWrite(result, ibit, read);
+  }
+  return result;
+}
 
+bool readBit() {
+  int t0 = millis();
+  while (!digitalRead(SCL)) {
+    ESP.wdtFeed();
+    // Waiting for SCL to became up
+    if (millis() - timeout_delay > t0) {
+      Serial.println("Timeout");
+    }
+  }
+  bool read = digitalRead(SDA);
+  digitalWrite(TR, 1);
+  // Serial.println(read);
+  t0 = millis();
+  while (digitalRead(SCL)) {
+    // Waiting for SCL to became down after reading
+    if (millis() - timeout_delay > t0) {
+      Serial.println("Timeout");
+    }
+    ESP.wdtFeed();
+  }
+  digitalWrite(TR, 0);
+  return read;
+}
+
+bool* readBools(long length) {
   bool * result = new bool[length];
   for (int i = 0; i < length; i++) {
-    // Serial.print("Ascolto il bit: ");
-    // Serial.println(i);
-
-    while (!digitalRead(SCL)) {
-      ESP.wdtFeed();
-    }// Waiting for SCL to became up
-    bool read = digitalRead(SDA);
-    digitalWrite(TR, 1);
-    // Serial.println(read);
-    result[i] = read;
-
-    while (digitalRead(SCL)) {
-      ESP.wdtFeed();
-    } // Waiting for SCL to became down after reading
-    digitalWrite(TR, 0);
-
+    result[i] = readBit();
   }
   return result;
 }
 
 String readString(long int length) {
-
   byte * r = readBytes(length);
   r[length] = '\0';
-
   return String((char*)r);
 }
+
 int readInt() {
+  int value;
 
-  byte * r = readBytes(4);
+  //byte * r = readBytes(4);
+  //foo = (uint32_t) r[3] << 24;
+  //foo |=  (uint32_t) r[2] << 16;
+  //foo |= (uint32_t) r[1] << 8;
+  //foo |= (uint32_t) r[0];
 
-  int foo;
-  foo = (uint32_t) r[3] << 24;
-  foo |=  (uint32_t) r[2] << 16;
-  foo |= (uint32_t) r[1] << 8;
-  foo |= (uint32_t) r[0];
-
-  return foo;
+  value = (uint32_t) readByte();
+  value |=  (uint32_t) readByte() << 8;
+  value |= (uint32_t) readByte() << 16;
+  value |= (uint32_t) readByte() << 24;
+  return value;
 }
 short readShort() {
+  short value;
 
-  byte * r = readBytes(2);
+  //byte * r = readBytes(2);
+  //foo = (short) r[1] << 8;
+  //foo |= (short) r[0] << 0;
 
-  short foo;
-  foo = (short) r[1] << 8;
-  foo |= (short) r[0] << 0;
+  value = (uint32_t) readByte();
+  value |= (uint32_t) readByte() << 8;
 
-  return foo;
+  return value;
 }
-void fetchData() {
+bool fetchData() {
   Serial.println("Fetching data \n");
-
   digitalWrite(TR, 1);
+  long t0 = millis();
   while (!digitalRead(SCL))
   {
     Serial.print(".");
+    if (millis() - timeout_delay > t0) {
+      return false;
+    }
+    ESP.wdtFeed();
   }
   digitalWrite(TR, 0);
 
   bool * info = readBools(16);
-
-  //int s = readShort();
-  /*
-    byte * message_size_b = readBytes(1);
-    int message_size = * message_size_b;
-  */
   int message_size = readShort();
+
   if (info[0]) {
     Serial.println("Prendo speed");
     speed = readShort();
@@ -122,5 +122,5 @@ void fetchData() {
     Serial.println(message);
   }
 
-
+  return true;
 }

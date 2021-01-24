@@ -14,32 +14,7 @@ void obdSetup()
       break;
     }
   }
-  if (smartSearch)
-  {
-    int s = 0;
-    for (int pid = 0; pid < 1000; pid++)
-    {
-      Serial.print(pid);
-      Serial.print(" ; ");
-      Serial.print(OBD2.pidName(pid));
-      Serial.print(" ; ");
-      Serial.print(OBD2.pidReadRaw(pid));
-      Serial.print(" ; ");
-      Serial.print(OBD2.pidRead(pid));
-      if (OBD2.pidSupported(pid))
-      {
-        // PID supported, continue to next one ...
-        s++;
-        Serial.print(" ; supported");
-      }
-      Serial.println("");
-    }
-    // Serial.print("Alvalieble ");
-    // Serial.print(s);
-    // Serial.println(" supported pids");
-
-    //todo smart indexing
-  }
+  dati = new float[maxPidsCount];
 }
 
 ReturnType getPidsValue(int pid, float &value)
@@ -51,7 +26,6 @@ ReturnType getPidsValue(int pid, float &value)
     return Error;
   }
 
-  // print PID name
   Serial.print(OBD2.pidName(pid));
   Serial.print(F(" = "));
 
@@ -91,23 +65,17 @@ ReturnType getPidsValue(int pid, float &value)
 
 void fetchData()
 {
-  if (smartSearch)
+  for (int pid = 0; pid < maxPidsCount; pid++)
   {
-  }
-  else
-  {
-    for (int pid = 0; pid < maxPidsCount; pid++)
+    float result;
+    ReturnType returnType = getPidsValue(pid, result);
+    if (returnType != Error)
     {
-      float result;
-      ReturnType returnType = getPidsValue(pid, result);
-      if (returnType != Error)
-      {
-        dati[pid] = result;
-      }
-      else
-      {
-        dati[pid] = 0;
-      }
+      dati[pid] = result;
+    }
+    else
+    {
+      dati[pid] = NULL;
     }
   }
 }

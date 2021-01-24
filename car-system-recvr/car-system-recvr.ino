@@ -12,7 +12,6 @@
 #define APPSK  "passnode"
 #endif
 
-/* Set these to your desired credentials. */
 const char *ssid = APSSID;
 const char *password = APPSK;
 
@@ -22,6 +21,8 @@ ESP8266WebServer server(80);
 short speed, rpm;
 int fuel_level;
 String message;
+int timeout_delay = 1000;
+
 void setup() {
   //ESP.wdtDisable();
   Serial.begin(250000);
@@ -33,7 +34,6 @@ void setup() {
 
   Serial.println();
   Serial.print("Configuring access point...");
-  /* You can remove the password parameter if you want the AP to be open. */
   WiFi.softAP(ssid, password, 1, 0);
 
   IPAddress myIP = WiFi.softAPIP();

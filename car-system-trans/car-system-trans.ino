@@ -20,11 +20,9 @@
 
 #define trans_size 16 //16 byte for every transition
 bool prevStat;
-
-int i=0;
+int timeout_delay = 1000;
 
 byte flags[] = {255, 255, 5};
-//byte lorem[] ="Lorem ipsum dolor sit ame";
 enum dictionary {
   speed,
   rpm,
@@ -55,28 +53,31 @@ typedef enum
 ReturnType getPidsValue(int pid, float &value);
 void obdSetup();
 void fetchData();
-
+long last_fetch = 0;
+int fetch_delay = 1000;
 void setup() {
-  //ESP.wdtDisable();
   Serial.begin(230400);
-
   Serial.println("trasmettitore");
+  
   pinMode(TR, INPUT);
   pinMode(SDA, OUTPUT);
   pinMode(SCL, OUTPUT);
-    obdSetup();
-delay(2000);
+  
+  obdSetup();
+  delay(2000);
 }
 
 
 void loop() {
-  #ifdef ESPb
-        ESP.wdtFeed();
-        #endif
-
+  if (millis() - last_fetch > fetch_delay) {
+    Serial.print("Start fetching:");
+    Serial.println(millis());
+    fetchData();
+    last_fetch = millis();
+    Serial.print("Finish fetching:");
+    Serial.println(millis());
+  }
   if (digitalRead(TR)) {
     replyRequest();
-    
   }
-
 }

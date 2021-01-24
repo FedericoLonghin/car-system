@@ -1,33 +1,44 @@
-void replyRequest(){
-  initSequence();
-i++;
-
+bool replyRequest() {
+  Serial.print("inizio la sequenza..:");
+  Serial.println(millis());
+  if (initSequence()) {
     sendFlags();
-  float value = 3;
-  if (boolFlag[0] && getPidsValue(VEHICLE_SPEED, value))     sendShort(value);
-  if (boolFlag[1] && getPidsValue(ENGINE_RPM, value))  sendShort(value);
-  if (boolFlag[2] && getPidsValue(FUEL_SYSTEM_STATUS, value)) sendInt(value);
-  
-//    if (boolFlag[0] ) sendShort(i);
-//    if (boolFlag[1])  sendShort(46);
-//    if (boolFlag[2]) sendInt(20);
-    if (boolFlag[15]) sendString(Message);
+
+    //float value = 3;
+    //if (boolFlag[0] && getPidsValue(VEHICLE_SPEED, value)) sendShort(value);
+    //if (boolFlag[1] && getPidsValue(ENGINE_RPM, value))  sendShort(value);
+    //if (boolFlag[2] && getPidsValue(FUEL_SYSTEM_STATUS, value)) sendInt(value);
+
+    if (boolFlag[0] )
+      if (!sendShort(dati[VEHICLE_SPEED]))return false;
+    if (boolFlag[1])
+      if (!sendShort(dati[ENGINE_RPM]))return false;
+    if (boolFlag[2])
+      if (!sendInt(dati[FUEL_SYSTEM_STATUS]))return false;
+    if (boolFlag[15])
+      if (!sendString(Message))return false;
 
     endSequence();
-    Serial.println("All done");
+    Serial.print("All done");
+  } else {
+    Serial.print("Sequence aborted: ");
+  }
+  Serial.println(millis());
 }
 
-void initSequence() {
-  //Serial.print("inizio la sequenza...");
+bool initSequence() {
   digitalWrite(SCL, 1);
-  while (digitalRead(TR)) {}
+  long t0 = millis();
+  while (digitalRead(TR)) {
+    if (millis() - timeout_delay > t0) {
+      Serial.println("Timeout");
+      return false;
+    }
+  }
   digitalWrite(SCL, 0);
-  //Serial.println("Fatto");
 }
 
-
-
-void mandaByte(byte data[256], int length) {
+bool mandaByte(byte *data, int length) {
   for (int j = 0; j < length; j++) {
     Serial.print("mando il byte n.: ");
     Serial.println(j);
@@ -37,19 +48,30 @@ void mandaByte(byte data[256], int length) {
       digitalWrite(SDA, bitRead(data[j], i));
 
       digitalWrite(SCL, 1);
+      long t0 = millis();
       while (!digitalRead(TR)) {
-      //  ESP.wdtFeed();
+        //  ESP.wdtFeed();
         // Serial.print(".");
+        if (millis() - timeout_delay > t0) {
+          Serial.println("Timeout");
+          return false;
+        }
       }
       Serial.print(" ...ricevuto");
       digitalWrite(SDA, 0);
       digitalWrite(SCL, 0);
+      t0 = millis();
       while (digitalRead(TR)) {  //Serial.print(",");
-      //  ESP.wdtFeed();
+        //  ESP.wdtFeed();
+        if (millis() - timeout_delay > t0) {
+          Serial.println("Timeout");
+          return false;
+        }
       }
       Serial.println(" | esco");
     }
   }
+  return true;
 }
 
 void endSequence() {
@@ -63,43 +85,44 @@ void endSequence() {
 
 
 
-void sendInt(int n) {
+bool sendInt(int n) {
   byte b[4];
   b[0] = n;
   b[1] = n >> 8;
   b[2] = n >> 16;
   b[3] = n >> 24;
-  mandaByte(b, 4);
+  return mandaByte(b, 4);
 
 }
 
-void sendShort(int val) {
+bool sendShort(int val) {
   byte b[4];
   b[0] = val;
   b[1] = val >> 8;
-  mandaByte(b, 2);
+  return mandaByte(b, 2);
 
 }
 
-void sendString(byte data[256]) {
-int n=getLength(data);
-  mandaByte(data, n);
+bool sendString(byte *data) {
+  int n = getLength(data);
+  return mandaByte(data, n);
 
 }
 
 void sendFlags() {
   Serial.println("----------------------------------------------------FLAGS--------------------------------------------------");
-  for( int i = 0; i < 16; i++) {
-  bitWrite(flags[i / 8], i % 8, boolFlag[i]);
+  for ( int i = 0; i < 16; i++) {
+    bitWrite(flags[i / 8], i % 8, boolFlag[i]);
   }
-
- mandaByte(flags, 2);
- sendShort(getLength(Message));
+  mandaByte(flags, 2);
+  sendShort(getLength(Message));
 }
 
 
-int getLength(byte value[256]){
-  int i=0; 
-  while(value[i]!='\0'){i++;}
+int getLength(byte *value) {
+  int i = 0;
+  while (value[i] != '\0') {
+    i++;
+  }
   return i;
 }
