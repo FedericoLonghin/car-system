@@ -73,10 +73,12 @@ void setup() {
   digitalWrite(SCL, 0);
   
   digitalWrite(RST_EXT, 1);
-  obdSetup();
+  delay(100);
   digitalWrite(RST_EXT, 0);
   delay(100);
   digitalWrite(RST_EXT, 1);
+    obdSetup();
+
   //delay(2000);
 }
 

@@ -25,21 +25,38 @@ bool initSequence() {
   Serial.println("SCL 1");
   digitalWrite(SDA, 1);
   Serial.println("SDA 1");
+  long tf = millis() + timeout_delay;
   while (digitalRead(TR)) {
     Serial.print(".");
+    if (millis() > tf) {
+      Serial.println("Timeout Aspettando TR che andasse a 0");
+      endSequence();
+      return false;
+    }
     //Aspetto lo tiri giù
   }
   Serial.println("");
   digitalWrite(SCL, 0);
   Serial.println("SCL 0");
+  tf = millis() + timeout_delay;
   while (!digitalRead(TR)) {
     //Aspetto lo ritiri su
+     if (millis() > tf) {
+      Serial.println("Timeout Aspettando TR che andasse a 1");
+      endSequence();
+      return false;
+    }
   }
   digitalWrite(SDA, 0);
   Serial.println("SDA 0");
-
+  tf = millis() + timeout_delay;
   while (digitalRead(TR)) {
     //Aspetto lo tiri giù
+     if (millis() > tf) {
+      Serial.println("Timeout Aspettando TR che andasse a 0 alla fine");
+      endSequence();
+      return false;
+    }
   }
   Serial.println("Finisco la seq");
   return true;
