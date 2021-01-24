@@ -5,11 +5,14 @@
 bool fetchData() {
   Serial.println("Fetching data...");
   if (!initSequence())return false;
-  Serial.println("Done!");
-  return 1;
-  bool * info;
-  if (!readBools(16, info)) {
-    Serial.println("Error in Bools");
+
+  Serial.println("initialized!");
+  bool * info =  new bool[16];
+//  for (int a = 0; a < 16; a++) {
+//    info[a]=0;
+//  }
+  if (!readInfo()) {
+    Serial.println("Error in Info");
     return false;
   }
 
@@ -18,10 +21,17 @@ bool fetchData() {
     Serial.println("Error in Short");
     return false;
   }
+  Serial.println("CI SONO");
+  Serial.println(info[0]);
 
-
+  for (int a = 0; a < 15; a++) {
+    Serial.print(info[a]);
+    Serial.print(" ");
+  }
+  Serial.println("");
   if (info[0]) {
     Serial.println("Prendo speed");
+    delay(300);
     if (!readShort(speed))return false;
     Serial.print("Speed: ");
     Serial.println(speed);
@@ -32,7 +42,7 @@ bool fetchData() {
     Serial.print("RPM: ");
     Serial.println(rpm);
   }
-  if (info[2]) {
+  if (info[1]) {
     Serial.println("Prendo fuel");
     if (!readInt(fuel_level))return false;
     Serial.print("Fuel level: ");
@@ -44,7 +54,7 @@ bool fetchData() {
     Serial.print("Message: ");
     Serial.println(message);
   }
-
+  Serial.println("Done!");
   return true;
 }
 
@@ -105,6 +115,7 @@ bool initSequence() {
   Serial.println("TR=0");
   digitalWrite(TR, 0);
   Serial.println("FATTO");
+  return 1;
 }
 
 

@@ -51,7 +51,7 @@ bool readBit(bool &value) {
     ESP.wdtFeed();
   }
   digitalWrite(TR, 0);
-  delay(100);
+
   Serial.println(" Done.");
   return true;
 }
@@ -65,6 +65,14 @@ bool readBools(long length, bool * result ) {
     //    Serial.print(i);
     //    Serial.print(": ");
     //    Serial.print(result[i]);
+  }
+  Serial.println("Done.");
+  return true;
+}
+bool readInfo() {
+  Serial.println("Reading Info...");
+  for (int i = 0; i < 16; i++) {
+    if (! readBit(info[i])) return false;
   }
   Serial.println("Done.");
   return true;

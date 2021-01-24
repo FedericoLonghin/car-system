@@ -22,7 +22,7 @@ short speed, rpm;
 int fuel_level;
 char* message;
 int timeout_delay = 500;
-
+bool info[16];
 void setup() {
   ESP.wdtDisable();
   Serial.begin(250000);
