@@ -89,6 +89,7 @@ bool readString(long int length, char * result) {
   Serial.println("Reading String...");
   byte * r;
   if (! readBytes(length, r)) return false;
+  Serial.println((char*)r);
   r[length] = '\0';
   result = (char*)r;
   Serial.println("Done.");
